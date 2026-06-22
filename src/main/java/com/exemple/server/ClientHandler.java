@@ -8,6 +8,7 @@ public class ClientHandler extends Thread {
     private final ChatServer server;
     private BufferedReader reader;
     private BufferedWriter writer;
+    private String username;
 
     public ClientHandler(Socket socket, ChatServer server) {
 

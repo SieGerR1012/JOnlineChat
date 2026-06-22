@@ -9,14 +9,9 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ChatServer {
-    private final int port;
 
     // Список подключенных клиентов
     private final List<ClientHandler> clients = new CopyOnWriteArrayList<>();
-
-    public ChatServer() {
-        this.port = SettingsLoader.getPort();
-    }
 
     public void start() {
         int port = SettingsLoader.getPort();
