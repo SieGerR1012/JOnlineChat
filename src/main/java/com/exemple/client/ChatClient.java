@@ -45,6 +45,10 @@ public class ChatClient {
                 String message = scanner.nextLine();
 
                 if (message.equalsIgnoreCase("/exit")) {
+                    writer.write("/exit");
+                    writer.newLine();
+                    writer.flush();
+
                     break;
                 }
                 writer.write(message);

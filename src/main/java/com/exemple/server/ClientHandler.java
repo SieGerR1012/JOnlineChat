@@ -35,11 +35,21 @@ public class ClientHandler extends Thread {
 
                 String message = reader.readLine();
 
+                // Клиент вышел
                 if (message == null) {
                     break;
                 }
 
+                // Обработка выхода клиента
+                if (message.equalsIgnoreCase("/exit")) {
+                    System.out.println(username + " вышел из чата");
+                    FileLogger.log(username + " вышел из чата");
+
+                    break;
+                }
+
                 String formattedMessage = "[" + TimeUtil.now() + "] " + username + ": " + message;
+
                 System.out.println("Получено: " + formattedMessage);
                 FileLogger.log(formattedMessage);
 
