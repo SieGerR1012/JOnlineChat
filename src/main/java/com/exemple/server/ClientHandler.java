@@ -1,5 +1,8 @@
 package com.exemple.server;
 
+import com.exemple.logger.FileLogger;
+import com.exemple.util.TimeUtil;
+
 import java.io.*;
 import java.net.Socket;
 
@@ -23,6 +26,11 @@ public class ClientHandler extends Thread {
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
+            // Первое сообщение от клиента — имя
+            username = reader.readLine();
+            System.out.println(username + " вошел в чат");
+            FileLogger.log(username + " вошел в чат");
+
             while (true) {
 
                 String message = reader.readLine();
@@ -31,15 +39,20 @@ public class ClientHandler extends Thread {
                     break;
                 }
 
-                System.out.println("Получено: " + message);
-                server.broadcast(message);
+                String formattedMessage = "[" + TimeUtil.now() + "] " + username + ": " + message;
+                System.out.println("Получено: " + formattedMessage);
+                FileLogger.log(formattedMessage);
+
+                server.broadcast(formattedMessage);
             }
 
         } catch (IOException e) {
             System.out.println("Клиент отключился");
 
         } finally {
-
+            if (username != null) {
+                FileLogger.log(username + " покинул чат");
+            }
             server.removeClient(this);
 
             try {
