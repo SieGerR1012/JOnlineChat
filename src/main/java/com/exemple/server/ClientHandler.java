@@ -12,6 +12,7 @@ public class ClientHandler extends Thread {
     private BufferedReader reader;
     private BufferedWriter writer;
     private String username;
+    private boolean registered;
 
     public ClientHandler(Socket socket, ChatServer server) {
 
@@ -28,6 +29,16 @@ public class ClientHandler extends Thread {
 
             // Первое сообщение от клиента — имя
             username = reader.readLine();
+
+            if (server.isUsernameTaken(username)) {
+                writer.write("Ошибка: имя \"" + username + "\" уже занято");
+                writer.newLine();
+                writer.flush();
+                return;
+            }
+
+            server.registerClient(this);
+            registered = true;
             System.out.println(username + " вошел в чат");
             FileLogger.log(username + " вошел в чат");
 
@@ -44,6 +55,7 @@ public class ClientHandler extends Thread {
                 if (message.equalsIgnoreCase("/exit")) {
                     System.out.println(username + " вышел из чата");
                     FileLogger.log(username + " вышел из чата");
+                    server.broadcast(username + " покинул чат");
 
                     break;
                 }
@@ -60,16 +72,21 @@ public class ClientHandler extends Thread {
             System.out.println("Клиент отключился");
 
         } finally {
-            if (username != null) {
+            if (registered) {
                 FileLogger.log(username + " покинул чат");
+                server.broadcast(username + " покинул чат");
+                server.removeClient(this);
             }
-            server.removeClient(this);
 
             try {
                 socket.close();
             } catch (IOException ignored) {
             }
         }
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     //Отправка сообщения клиенту

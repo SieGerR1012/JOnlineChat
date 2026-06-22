@@ -6,12 +6,15 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ChatServer {
 
     // Список подключенных клиентов
     private final List<ClientHandler> clients = new CopyOnWriteArrayList<>();
+    private final Set<String> usernames = ConcurrentHashMap.newKeySet();
 
     public void start() {
         int port = SettingsLoader.getPort();
@@ -27,7 +30,6 @@ public class ChatServer {
 
                 ClientHandler clientHandler = new ClientHandler(socket, this);
 
-                clients.add(clientHandler);
                 clientHandler.start();
             }
 
@@ -45,10 +47,22 @@ public class ChatServer {
         System.out.println("Отправлено всем: " + message);
     }
 
+    // Регистрация клиента после проверки имени
+    public void registerClient(ClientHandler clientHandler) {
+        clients.add(clientHandler);
+        usernames.add(clientHandler.getUsername());
+    }
+
+    // Проверка, занято ли имя
+    public boolean isUsernameTaken(String username) {
+        return usernames.contains(username);
+    }
+
     // Удаление клиента после отключения
     public void removeClient(
             ClientHandler clientHandler) {
         clients.remove(clientHandler);
+        usernames.remove(clientHandler.getUsername());
         System.out.println("Клиент отключен");
     }
 }
